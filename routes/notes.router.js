@@ -86,7 +86,7 @@ router.put('/notes/:id', (req, res, next) => {
     .update(updateObj)
     .where({id: noteId})
     .returning(['id', 'title', 'content'])
-    .then(item => {
+    .then(([item]) => {
       if (item) {
         res.json(item);
       } else {
