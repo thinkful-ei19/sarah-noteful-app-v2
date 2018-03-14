@@ -21,8 +21,8 @@ app.use(express.static('public'));
 // Parse request body
 app.use(express.json());
 
-// Mount router on "/v2"
-app.use('/v2', notesRouterV2);
+// Mount router on "/api"
+app.use('/api', notesRouterV2);
 
 // Catch-all 404
 app.use(function (req, res, next) {
