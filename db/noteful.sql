@@ -1,8 +1,11 @@
 -- psql -U dev -f ./db/noteful.sql -d noteful-app
 --SELECT CURRENT_DATE;
 
+DROP TABLE IF EXISTS notes_tags;
+DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS notes;
 DROP TABLE IF EXISTS folders;
+
 
 CREATE TABLE folders (
     id serial PRIMARY KEY,
@@ -17,7 +20,15 @@ CREATE TABLE notes (
   folder_id int REFERENCES folders ON DELETE SET NULL
 );
 
+CREATE TABLE tags (
+    id serial PRIMARY KEY,
+    name text NOT NULL
+);
 
+CREATE TABLE notes_tags (
+  note_id INTEGER NOT NULL REFERENCES notes ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL REFERENCES tags ON DELETE CASCADE
+);
 
 ALTER SEQUENCE notes_id_seq RESTART WITH 1000;
 ALTER SEQUENCE folders_id_seq RESTART WITH 100;
@@ -70,7 +81,23 @@ INSERT INTO notes (title, content, folder_id) VALUES
     'Posuere sollicitudin aliquam ultrices sagittis orci a. Feugiat sed lectus vestibulum mattis ullamcorper velit. Odio pellentesque diam volutpat commodo sed egestas egestas fringilla. Velit egestas dui id ornare arcu odio. Molestie at elementum eu facilisis sed odio morbi. Tempor nec feugiat nisl pretium. At tempor commodo ullamcorper a lacus. Egestas dui id ornare arcu odio. Id cursus metus aliquam eleifend. Vitae sapien pellentesque habitant morbi tristique. Dis parturient montes nascetur ridiculus. Egestas egestas fringilla phasellus faucibus scelerisque eleifend. Aliquam faucibus purus in massa tempor nec feugiat nisl.', 101
   );
 
+INSERT INTO tags (name) VALUES
+  ('important'),
+  ('meh'),
+  ('read again'),
+  ('delete this');
 
+INSERT INTO notes_tags (note_id, tag_id) VALUES
+  (1000, 1),
+  (1001, 1),
+  (1002, 4), (1002, 2),
+  (1003, 4),
+  (1004, 1),
+  (1005, 2),
+  (1006, 3), (1006, 1), (1006, 2),
+  (1007, 2),
+  (1008, 3),
+  (1009, 1);
 
 
 

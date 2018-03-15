@@ -31,7 +31,7 @@ router.get('/notes', (req, res, next) => {
         queryBuilder.where('folder_Id', folderId);
       }
     })
-    .orderBy('notes.id')
+    .orderBy('notes.id', 'desc')
     .then(results => {
       res.json(results);
     })
@@ -73,6 +73,9 @@ router.get('/notes/:id', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/notes/:id', (req, res, next) => {
+
+ 
+  
   const noteId = req.params.id;
   /***** Never trust users - validate input *****/
   const updateObj = {};
