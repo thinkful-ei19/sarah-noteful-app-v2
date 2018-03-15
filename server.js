@@ -5,6 +5,7 @@ const morgan = require('morgan');
 
 const { PORT } = require('./config');
 
+const tagsRouterV2 = require('./routes/tags.router');
 const foldersRouterV2 = require('./routes/folders.router');
 const notesRouterV2 = require('./routes/notes.router');
 
@@ -23,6 +24,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 // Mount router on "/api"
+app.use('/api', tagsRouterV2);
 app.use('/api', foldersRouterV2);
 app.use('/api', notesRouterV2);
 
