@@ -16,7 +16,7 @@ router.get('/folders', (req, res, next) => {
     .catch(err => next(err));
 });
 
-// Get Folder by id
+// Get Folder by id)
 router.get('/folders/:id', (req, res, next) => {
   const folderId = req.params.id;
 
