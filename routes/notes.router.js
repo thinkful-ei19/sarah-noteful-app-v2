@@ -90,45 +90,76 @@ router.get('/notes/:id', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/notes/:id', (req, res, next) => {
-
- 
-  
   const noteId = req.params.id;
-  /***** Never trust users - validate input *****/
-  const updateObj = {};
-  const updateableFields = ['title', 'content', 'folder_id'];
+  console.log(req.params);
+  console.log(req.body);
+  const { title, content, folder_id, tags = [] } = req.body;
 
-  updateableFields.forEach(field => {
-    if (field in req.body) {
-      updateObj[field] = req.body[field];
-    }
-  });
-
-  /***** Never trust users - validate input *****/
-  if (!updateObj.title) {
+  /***** Never trust users. Validate input *****/
+  if (!title) {
     const err = new Error('Missing `title` in request body');
     err.status = 400;
     return next(err);
   }
 
+  const updateNote = {
+    title: title,
+    content: content,
+    folder_id: folder_id
+  };
+  // const updateObj = {};
+  // const updateableFields = ['title', 'content', 'folder_id', 'tags'];
+
+  // updateableFields.forEach(field => {
+  //   if (field in req.body) {
+  //     updateObj[field] = req.body[field];
+  //   }
+  // });
+  // console.log(updateObj);
+
+  // /***** Never trust users - validate input *****/
+  // if (!updateObj.title) {
+  //   const err = new Error('Missing `title` in request body');
+  //   err.status = 400;
+  //   return next(err);
+  //}
+
+ 
+
   knex('notes')
-    .update(updateObj)
-    .where({id: noteId})
+    .update(updateNote)
+    .where('id', noteId)
     .returning(['id'])
     .then(() => {
-      return knex.select('notes.id', 'title', 'content', 'folder_id', 'folders.name as folder_name')
+      return knex.del()
+        .from('notes_tags')
+        .where('note_id', noteId);
+    })
+    .then(() => {
+      const tagsInsert = tags.map(tagid => ({ note_id: noteId, tag_id: tagid }));
+      return knex.insert(tagsInsert)
+        .into('notes_tags');
+    })
+    .then(() => {
+      return knex.select('notes.id', 'title', 'content',
+        'folders.id as folder_id', 'folders.name as folderName',
+        'tags.id as tagId', 'tags.name as tagName')
         .from('notes')
         .leftJoin('folders', 'notes.folder_id', 'folders.id')
+        .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+        .leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
         .where('notes.id', noteId);
     })
-    .then(([item]) => {
-      if (item) {
-        res.json(item);
+    .then(result => {
+      if (result) {
+        const hydrated = hydrateNotes(result);
+        res.json(hydrated[0]);
       } else {
         next();
       }
     })
     .catch(err => next(err));
+
   /*
   notes.update(noteId, updateObj)
     .then(item => {
