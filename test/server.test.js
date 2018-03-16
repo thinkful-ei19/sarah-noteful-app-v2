@@ -196,7 +196,7 @@ describe('Noteful API', function () {
     });
   });
 
-  describe('POST /api/notes', function () {
+  describe.only('POST /api/notes', function () {
 
     it('should create and return a new item when provided valid data', function () {
       const newItem = {
@@ -215,7 +215,7 @@ describe('Noteful API', function () {
           //console.log(res.location);
           expect(res).to.be.json;
           expect(body).to.be.a('object');
-          expect(body).to.include.keys('id', 'title', 'content', 'folder_id');
+          expect(body).to.include.keys('id', 'title', 'content', 'folder_id', 'tags');
           return knex.select().from('notes').where('id', body.id);
         })
         .then(([data]) => {
