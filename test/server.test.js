@@ -306,6 +306,7 @@ describe('Noteful API', function () {
         .then(function(res) {
           expect(res).to.have.status(404);
           expect(res.body).be.a('object');
+          expect(res.body.message).to.equal('Not Found');
           //console.log(res);
         });
     });
