@@ -17,41 +17,75 @@ const notes = simDB.initialize(data);
 // Get All (and search by query)
 /* ========== GET/READ ALL NOTES ========== */
 router.get('/notes', (req, res, next) => {
-  const { searchTerm } = req.query;
-  const {folderId} = req.query;
-  const {tagId} = req.query;
-  knex.select('notes.id', 'title', 'content', 'folders.id as folder_Id', 'folders.name as folder_Name', 'tags.id as tagId', 'tags.name as tagName')
+  const searchTerm = req.query.searchTerm;
+  const folderId = req.query.folderId;
+  const tagId = req.query.tagId;
+
+  knex.select('notes.id', 'title', 'content',
+    'folders.id as folderId', 'folders.name as folderName',
+    'tags.id as tagId', 'tags.name as tagName')
     .from('notes')
     .leftJoin('folders', 'notes.folder_id', 'folders.id')
     .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
     .leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
-    .where(function() {
-      if(searchTerm) {
+    .where(function () {
+      if (searchTerm) {
         this.where('title', 'like', `%${searchTerm}%`);
       }
     })
-    .modify(function (queryBuilder) {
+    .where(function () {
       if (folderId) {
-        queryBuilder.where('folder_Id', folderId);
+        this.where('folder_id', folderId);
       }
     })
-    .modify(function (queryBuilder) {
+    .where(function () {
       if (tagId) {
-        queryBuilder.where(tagId);
+        this.where('tag_id', tagId);
       }
     })
-    .orderBy('notes.id', 'desc')
-    .then(result => {
-      if (result) {
-        const hydrated = hydrateNotes(result);
-        res.json(hydrated);
-      } else {
-        next();
-      }
+    .orderBy('notes.id')
+    .then(results => {
+      const hydrated = hydrateNotes(results);
+      res.json(hydrated);
     })
-    .catch(err => next(err));
-  console.log(res.body);
+    .catch(next);
 });
+// router.get('/notes', (req, res, next) => {
+//   const { searchTerm } = req.query;
+//   const {folderId} = req.query;
+//   const {tagId} = req.query;
+//   knex.select('notes.id', 'title', 'content', 'folders.id as folder_Id', 'folders.name as folder_Name', 'tags.id as tagId', 'tags.name as tagName')
+//     .from('notes')
+//     .leftJoin('folders', 'notes.folder_id', 'folders.id')
+//     .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+//     .leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
+//     .where(function() {
+//       if(searchTerm) {
+//         this.where('title', 'like', `%${searchTerm}%`);
+//       }
+//     })
+//     .modify(function (queryBuilder) {
+//       if (folderId) {
+//         queryBuilder.where('folder_Id', folderId);
+//       }
+//     })
+//     .modify(function (queryBuilder) {
+//       if (tagId) {
+//         queryBuilder.where(tagId);
+//       }
+//     })
+//     .orderBy('notes.id', 'desc')
+//     .then(result => {
+//       if (result) {
+//         const hydrated = hydrateNotes(result);
+//         res.json(hydrated);
+//       } else {
+//         next();
+//       }
+//     })
+//     .catch(err => next(err));
+//   console.log(res.body);
+// });
 
 /* ========== GET/READ SINGLE NOTES ========== */
 router.get('/notes/:id', (req, res, next) => {
@@ -91,8 +125,8 @@ router.get('/notes/:id', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/notes/:id', (req, res, next) => {
   const noteId = req.params.id;
-  console.log(req.params);
-  console.log(req.body);
+  // console.log(req.params);
+  // console.log(req.body);
   const { title, content, folder_id, tags = [] } = req.body;
 
   /***** Never trust users. Validate input *****/

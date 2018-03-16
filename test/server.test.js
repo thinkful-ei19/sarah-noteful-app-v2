@@ -102,10 +102,13 @@ describe('Noteful API', function () {
         .then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.be.json;
+          expect(res).to.be.a('object');
           expect(res.body).to.be.a('array');
           expect(res.body).to.have.length(count);
+          // console.log(res.body);
         });
     });
+
 
     it('should return a list with the correct right fields', function () {
       return chai.request(app)
@@ -158,6 +161,8 @@ describe('Noteful API', function () {
           expect(res.body).to.have.length(2);
           expect(res.body[0]).to.be.an('object');
           expect(res.body[0].id).to.equal(data[0].id);
+          //console.log(res.status);
+          //console.log(res.body);
         });
     });
 
@@ -207,14 +212,17 @@ describe('Noteful API', function () {
           body = res.body;
           expect(res).to.have.status(201);
           expect(res).to.have.header('location');
+          //console.log(res.location);
           expect(res).to.be.json;
           expect(body).to.be.a('object');
-          expect(body).to.include.keys('id', 'title', 'content');
+          expect(body).to.include.keys('id', 'title', 'content', 'folder_id');
           return knex.select().from('notes').where('id', body.id);
         })
         .then(([data]) => {
           expect(body.title).to.equal(data.title);
           expect(body.content).to.equal(data.content);
+          // console.log(body);
+          // console.log(data);
         });
     });
 
@@ -240,22 +248,23 @@ describe('Noteful API', function () {
 
     it('should update the note', function () {
       const updateItem = {
-        'title': 'What about dogs?!',
-        'content': 'woof woof',
+        'title': 'All about dogs!!',
+        'content': 'woof woof bark',
         'tags': []
       };
       return chai.request(app)
-        .put('/api/notes/1005')
+        .put('/api/notes/1007')
         .send(updateItem)
         .then(function (res) {
           expect(res).to.have.status(200);
           expect(res).to.be.json;
           expect(res.body).to.be.a('object');
-          expect(res.body).to.include.keys('id', 'title', 'content');
-
-          expect(res.body.id).to.equal(1005);
+          expect(res.body).to.include.keys('id', 'title', 'content', 'folder_id', 'tags');
+          expect(res.body.id).to.equal(1007);
           expect(res.body.title).to.equal(updateItem.title);
           expect(res.body.content).to.equal(updateItem.content);
+          console.log(res.body);
+          console.log(res.status);
         });
     });
 
@@ -277,16 +286,29 @@ describe('Noteful API', function () {
 
   });
 
-  describe('DELETE  /api/notes/:id', function () {
+  describe.only('DELETE  /api/notes/:id', function () {
 
     it('should delete an item by id', function () {
       return chai.request(app)
         .delete('/api/notes/1005')
         .then(function (res) {
           expect(res).to.have.status(204);
+          expect(res.body).to.be.a('object');
+          expect(res.body).be.empty;
+          console.log(res.body);
         });
     });
     
+    it('should return a 404 error if the id does not exist', function () {
+      return chai.request(app)
+        .delete('/api/notes/99999')
+        .catch(err => err.response)
+        .then(function(res) {
+          expect(res).to.have.status(404);
+          expect(res.body).be.a('object');
+          //console.log(res);
+        });
+    });
   });
 
 });
