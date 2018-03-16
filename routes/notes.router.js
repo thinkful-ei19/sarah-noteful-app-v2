@@ -175,7 +175,7 @@ router.put('/notes/:id', (req, res, next) => {
 
 /* ========== POST/CREATE ITEM ========== */
 router.post('/notes', (req, res, next) => {
-  const { title, content, folder_id, tags = [] } = req.body; //added folder_id
+  const { title, content, folder_id, tags = [] } = req.body; //added folder_id and tags array
   
   const newItem = { title, content, folder_id };
   /***** Never trust users - validate input *****/
